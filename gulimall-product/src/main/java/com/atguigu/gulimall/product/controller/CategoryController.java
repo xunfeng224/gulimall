@@ -38,8 +38,6 @@ public class CategoryController {
     public R list(){
 
         List<CategoryEntity> entities = categoryService.listWithTree();
-
-
         return R.ok().put("data", entities);
     }
 
@@ -97,7 +95,8 @@ public class CategoryController {
 		//categoryService.removeByIds(Arrays.asList(catIds));
 
         categoryService.removeMenuByIds(Arrays.asList(catIds));
-
+        String str ="aa";
+        char c = str.charAt(0);
         return R.ok();
     }
 

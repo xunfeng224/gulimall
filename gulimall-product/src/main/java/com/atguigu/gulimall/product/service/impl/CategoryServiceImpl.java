@@ -43,6 +43,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public List<CategoryEntity> listWithTree() {
+        //TODO 运行效率低，可以优化
+        //TODO 不能直接返回Entity，应该封装成DTO返回
         //1、查出所有分类
         List<CategoryEntity> entities = baseMapper.selectList(null);
 

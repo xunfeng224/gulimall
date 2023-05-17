@@ -2,20 +2,14 @@
 
 # 服务器信息
 
-百度云 2核/4GB内存/80GB磁盘/6Mbps带宽
 
-centos-8u2-x86_64-20210901154800
-
-公网ip:106.13.196.135
-		主私网IP:192.168.0.4
-		username：root 
-		password：0224zttf@null
+公网ip:
 
 ## 环境配置
 
 1. mysq
 
-   ip:106.13.196.135
+   ip:
    username=root
    password=Xf123456!
 
@@ -26,13 +20,22 @@ centos-8u2-x86_64-20210901154800
    mkdir -p /mydata/mysql/{conf,data,log}
    ```
 
-   ```shell
-   docker run -p 3306:3306 --name mysql5.7 -v /mydata/mysql/log:/var/log/mysql -v /mydata/mysql/data:/var/lib/mysql -v /mydata/mysql/conf:/etc/mysql -e MYSQL_ROOT_PASSWORD=Xf123456! -d mysql:last
-   
+```shell
    ##可以先创建my.conf再docker run
    vi /mydata/mysql/conf/my.conf
+   
+   ##低版本
+   docker run -p 3306:3306 --name mysql5.7 -v /mydata/mysql/log:/var/log/mysql -v /mydata/mysql/data:/var/lib/mysql -v /mydata/mysql/conf:/etc/mysql -e MYSQL_ROOT_PASSWORD=Xf123456! -d mysql:last
+   ##高版本
+   docker run -p 3306:3306 --name mysql \
+   -v /mydata/mysql/conf:/etc/mysql/conf.d \
+   -v /mydata/mysql/logs:/var/log/mysql \
+   -v /mydata/mysql/data:/var/lib/mysql \
+   -e MYSQL_ROOT_PASSWORD=root \
+   -d mysql:8.0.33
+   
    docker restart mysql
-   ```
+```
 
    my.conf
 
@@ -47,6 +50,28 @@ centos-8u2-x86_64-20210901154800
    > character-set-server=utf8
    > skip-character-set-client-handshake
    > skip-name-resolve
+
+   MySQL8.0.33开启远程连接
+```shell
+##进入容器内部
+docker exec -it mysql /bin/bash
+##登录
+mysql -uroot -p
+##选择mysql数据库
+use mysql;
+##授予权限 %表示host不受限制，如果是本机使用localhost
+grant all privileges on *.* to 'root'@'%';
+##网上很多是下面这条有可能报错
+##GRANT ALL PRIVILEGES ON *.* 'root'@'%' identified by '密码' WITH GRANT OPTION;
+##刷新权限
+flush privileges;
+
+##如果出现Client does not support authentication protocol requested by server;
+##原因是mysql 8以上默认使用的是caching_sha2_password身份验证机制，之前用的是mysql_native_password。
+##修改密码的加密方式
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '密码';
+```
+
 
 2. redis
 
