@@ -1,0 +1,57 @@
+version: '3'
+services:
+  # 数据存储mysql
+  mysql:
+    image: mysql:8.0.33
+    container_name: mysql-8.0.33
+    restart: always
+    volumes:
+      - /mydata/mysql/data:/var/lib/mysql
+      - /mydata/mysql/conf:/etc/mysql/conf.d
+      - /mydata/mysql/log:/var/log/mysql
+      # 数据库初始化脚本，当Mysql容器首次启动时，会在 /docker-entrypoint-initdb.d目录下扫描 .sh，.sql，.sql.gz类型的文件。如果这些类型的文件存在，将执行它们来初始化一个数据库；
+      - /mydata/mysql/init/:/docker-entrypoint-initdb.d/
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      # 指定初始化sql文件的数据库
+      - MYSQL_DATABASE=my_db
+      - TZ=Asia/Shanghai
+    ports:
+      - 3306:3306
+  # 注册与配置中心
+  nacos:
+    image: nacos/nacos-server:2.0.3
+    container_name: nacos-2.0.3
+    restart: always
+    volumes:
+      - /mydata/nacos/logs:/nacos/logs
+    environment:
+      - MODE=standalone
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=175.178.72.68
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=root
+      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=10000&socketTimeout=3000&autoReconnect=true&useSSL=false&serverTimezone=UTC
+      - JVM_XMS=256m
+      - JVM_XMX=256m
+      - JVM_XMN=256m
+    ports:
+      - 8848:8848
+      - 9848:9848
+      - 9849:9849
+  # 缓存redis
+  redis:
+    image: redis:7.0.11
+    container_name: redis-7.0.11
+    restart: always
+    volumes:
+      - /mydata/redis/data:/data
+      - /mydata/redis/conf/redis.conf:/etc/redis/redis.conf
+      - /mydata/redis/logs:/logs
+    ports:
+      - 6379:6379
+    command: redis-server /etc/redis/redis.conf
+
+
