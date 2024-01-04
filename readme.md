@@ -70,6 +70,8 @@ flush privileges;
 ##原因是mysql 8以上默认使用的是caching_sha2_password身份验证机制，之前用的是mysql_native_password。
 ##修改密码的加密方式
 ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '密码';
+
+update user set host='%' where user='root' ;
 ```
 
 
